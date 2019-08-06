@@ -7,7 +7,6 @@
 #include <string>
 
 #include "peerReader.h"
-#include "../utils/commonUtils.h"
 
 std::map<std::string, std::queue<std::string>> peerReader::readMap;
 std::mutex peerReader::readMapMutex;
