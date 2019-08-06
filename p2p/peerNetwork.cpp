@@ -58,6 +58,7 @@ void peerNetwork::connectToPeer(std::string ipAddress, int port) {
         peerThread pt = peerThread(clientSocket, ipAddress);
         std::thread ptThread(&peerThread::run, pt);
         ptThread.detach();
+        peerThreads.emplace_back(pt);
     }
 }
 
