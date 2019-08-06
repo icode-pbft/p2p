@@ -19,7 +19,11 @@ peerReader::peerReader() {}
 peerReader::peerReader(SOCKET clientSocket, const std::string &ipAddress) : clientSocket(clientSocket),
                                                                        ipAddress(ipAddress) {
     std::deque<std::string> readQueue;
-    peerReader::readMap[this->ipAddress] = readQueue;
+    readMapMutex.lock();
+    if (peerReader::readMap.count(this->ipAddress) == 0) {
+        peerReader::readMap[this->ipAddress] = readQueue;
+    }
+    readMapMutex.unlock();
 }
 
 /**

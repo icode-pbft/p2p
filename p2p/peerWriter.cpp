@@ -16,7 +16,11 @@ peerWriter::peerWriter() {}
 peerWriter::peerWriter(SOCKET clientSocket, const std::string &ipAddress) : clientSocket(clientSocket),
                                                                        ipAddress(ipAddress) {
     std::deque<std::string> writeQueue;
-    peerWriter::writeMap[this->ipAddress] = writeQueue;
+    writeMapMutex.lock();
+    if (peerWriter::writeMap.count(this->ipAddress) == 0) {
+        peerWriter::writeMap[this->ipAddress] = writeQueue;
+    }
+    writeMapMutex.unlock();
 }
 
 /**
