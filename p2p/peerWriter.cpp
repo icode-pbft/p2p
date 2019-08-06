@@ -9,14 +9,14 @@
 #include "peerWriter.h"
 #include "../utils/commonUtils.h"
 
-std::map<std::string, std::queue<std::string>> peerWriter::writeMap;
+std::map<std::string ,std::deque<std::string>> peerWriter::writeMap;
 std::mutex peerWriter::writeMapMutex;
 
 peerWriter::peerWriter() {}
 
 peerWriter::peerWriter(SOCKET clientSocket, const std::string &ipAddress) : clientSocket(clientSocket),
                                                                        ipAddress(ipAddress) {
-    std::queue<std::string> writeQueue;
+    std::deque<std::string> writeQueue;
     peerWriter::writeMap[this->ipAddress] = writeQueue;
 }
 
@@ -31,7 +31,7 @@ void peerWriter::run() {
         writeMapMutex.lock();
         if (!peerWriter::writeMap[this->ipAddress].empty()) {
             sendMsg = peerWriter::writeMap[this->ipAddress].front();
-            peerWriter::writeMap[this->ipAddress].pop();
+            peerWriter::writeMap[this->ipAddress].pop_front();
         }
         writeMapMutex.unlock();
 
@@ -59,7 +59,10 @@ void peerWriter::run() {
 void peerWriter::write(std::string msg) {
     // Save the message to the end of the queue
     writeMapMutex.lock();
-    peerWriter::writeMap[this->ipAddress].push(msg);
+    std::deque<std::string> &temp = peerWriter::writeMap[this->ipAddress];
+    if (std::find(temp.begin(), temp.end(), msg) == temp.end() || temp.empty()) {
+        temp.push_back(msg);
+    }
     writeMapMutex.unlock();
 }
 

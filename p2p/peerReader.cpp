@@ -9,7 +9,7 @@
 #include "peerReader.h"
 #include "../utils/commonUtils.h"
 
-std::map<std::string, std::queue<std::string>> peerReader::readMap;
+std::map<std::string, std::deque<std::string>> peerReader::readMap;
 std::mutex peerReader::readMapMutex;
 
 peerReader::peerReader() {}
@@ -19,7 +19,7 @@ peerReader::peerReader() {}
  */
 peerReader::peerReader(SOCKET clientSocket, const std::string &ipAddress) : clientSocket(clientSocket),
                                                                        ipAddress(ipAddress) {
-    std::queue<std::string> readQueue;
+    std::deque<std::string> readQueue;
     peerReader::readMap[this->ipAddress] = readQueue;
 }
 
@@ -49,7 +49,10 @@ void peerReader::run() {
             }
             //todo:存入队列 2019年8月3日15:17:23 田泽鑫
             readMapMutex.lock();
-            peerReader::readMap[this->ipAddress].push(msg);
+            std::deque<std::string> &temp = peerReader::readMap[this->ipAddress];
+            if (std::find(temp.begin(), temp.end(), msg) == temp.end() || temp.empty()) {
+                temp.push_back(msg);
+            }
             readMapMutex.unlock();
         }
         //todo:沉睡？
@@ -70,7 +73,7 @@ std::vector<std::string> peerReader::readData() {
     readMapMutex.lock();
     while (!peerReader::readMap[this->ipAddress].empty()) {
         buffer.emplace_back(peerReader::readMap[this->ipAddress].front());
-        peerReader::readMap[this->ipAddress].pop();
+        peerReader::readMap[this->ipAddress].pop_front();
     }
     readMapMutex.unlock();
 

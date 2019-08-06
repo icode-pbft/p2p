@@ -21,7 +21,7 @@ public:
      * key = ip
      * value = the queue on which the message is sent
      */
-    static std::map<std::string ,std::queue<std::string>> writeMap;
+    static std::map<std::string ,std::deque<std::string>> writeMap;
 
     static std::mutex writeMapMutex;
 public:
