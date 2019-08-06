@@ -13,4 +13,4 @@ target_link_libraries(YOUR_PROJECT ws2_32)
 
 Clion导入工程
 
-File->New Project from Sources->选中p2p文件夹->Import as a new Cmake project->Ok
+File->New CMake Project from Sources->选中p2p文件夹->Import as a new Cmake project->Ok

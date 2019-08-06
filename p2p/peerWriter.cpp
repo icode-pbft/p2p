@@ -7,7 +7,6 @@
 #include <mutex>
 
 #include "peerWriter.h"
-#include "../utils/commonUtils.h"
 
 std::map<std::string, std::queue<std::string>> peerWriter::writeMap;
 std::mutex peerWriter::writeMapMutex;
