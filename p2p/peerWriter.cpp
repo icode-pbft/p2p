@@ -62,10 +62,7 @@ void peerWriter::run() {
 void peerWriter::write(std::string msg) {
     // Save the message to the end of the queue
     writeMapMutex.lock();
-    std::deque<std::string> &temp = peerWriter::writeMap[this->ipAddress];
-    if (std::find(temp.begin(), temp.end(), msg) == temp.end() || temp.empty()) {
-        temp.push_back(msg);
-    }
+    peerWriter::writeMap[this->ipAddress].push_back(msg);
     writeMapMutex.unlock();
 }
 

@@ -52,10 +52,7 @@ void peerReader::run() {
             }
             //todo:存入队列 2019年8月3日15:17:23 田泽鑫
             readMapMutex.lock();
-            std::deque<std::string> &temp = peerReader::readMap[this->ipAddress];
-            if (std::find(temp.begin(), temp.end(), msg) == temp.end() || temp.empty()) {
-                temp.push_back(msg);
-            }
+            peerReader::readMap[this->ipAddress].push_back(msg);
             readMapMutex.unlock();
         }
         //todo:沉睡？

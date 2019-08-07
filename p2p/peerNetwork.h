@@ -20,6 +20,7 @@ private:
     int port;
     bool runFlag = true;
 
+    static std::mutex networkMutex;
 public:
     /** a collection of clients that have established a connection */
     std::vector<peerThread> peerThreads;

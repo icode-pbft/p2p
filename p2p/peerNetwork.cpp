@@ -13,6 +13,7 @@
 #include "peerNetwork.h"
 #include "peerThread.h"
 
+std::mutex peerNetwork::networkMutex;
 
 peerNetwork::peerNetwork() {
     this->port = 8015;
@@ -58,7 +59,20 @@ void peerNetwork::connectToPeer(std::string ipAddress, int port) {
         peerThread pt = peerThread(clientSocket, ipAddress);
         std::thread ptThread(&peerThread::run, pt);
         ptThread.detach();
-        peerThreads.emplace_back(pt);
+
+        networkMutex.lock();
+        int flag = true;
+        for (auto & peerThread : peerThreads) {
+            if (ipAddress == peerThread.ipAddress) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) {
+            peerThreads.emplace_back(pt);
+            std::cout<< "peerNetWork connectToPeer(): number of accepted connection: " <<peerThreads.size() << std::endl;
+        }
+        networkMutex.unlock();
     }
 }
 
@@ -114,12 +128,23 @@ void peerNetwork::run() {
         inet_ntop(AF_INET, &clientAddr.sin_addr, ipAddress, sizeof(ipAddress));
         std::cout << "\npeerNetWork run(): accept client IP: " << ipAddress << "\n"<< std::endl;
 
-        peerThread peerThread1 = peerThread(connectSocket, ipAddress);
-        peerThreads.emplace_back(peerThread1);
-
-        std::cout<< "peerNetWork run(): number of accepted connection: " <<peerThreads.size() << std::endl;
-        std::thread ptThread(&peerThread::run, peerThread1);
+        peerThread pt = peerThread(connectSocket, ipAddress);
+        std::thread ptThread(&peerThread::run, pt);
         ptThread.detach();
+
+        networkMutex.lock();
+        int flag = true;
+        for (auto & peerThread : peerThreads) {
+            if (ipAddress == peerThread.ipAddress) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) {
+            peerThreads.emplace_back(pt);
+            std::cout<< "peerNetWork run(): number of accepted connection: " <<peerThreads.size() << std::endl;
+        }
+        networkMutex.unlock();
     }
 }
 
